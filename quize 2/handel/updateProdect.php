@@ -1,0 +1,78 @@
+<?php 
+require_once '../connection/conn.php';
+
+if(isset($_GET['id'])&& isset($_POST['submit'])){
+    $id=$_GET['id'];
+     $query="SELECT * FROM products WHERE id=$id";
+     $ranQuery=mysqli_query($conn,$query);
+     if(mysqli_num_rows($ranQuery)==1){
+        $product=mysqli_fetch_assoc($ranQuery);
+
+    $name=trim(htmlspecialchars($_POST['name']));
+    $description=trim(htmlspecialchars($_POST['description']));
+    $price=trim(htmlspecialchars($_POST['price']));
+    $stock=trim(htmlspecialchars($_POST['stock']));
+
+
+    $error=[];
+     // validation 
+
+     //name 
+     if(empty($name)){
+        $error[]="name is empty";
+     }elseif(strlen($name)<3){
+        $error[]="name must be at least 3 characters";
+     }elseif(strlen($name)>50){
+        $error[]="name must be less than 50 characters";
+     }elseif(!preg_match("/^[a-zA-Z\s]+$/", $name)){
+        $error[]="name must contain only letters and spaces";
+     }
+
+
+     // description 
+      
+     if( empty($description)){
+        $error[]=" description is empty";
+     }elseif(strlen($description)<3){
+        $error[]="description must be at least 3 characters";
+     }elseif(strlen($description)>1000){
+        $error[]="description must be less than 1000 characters";
+     }elseif(!preg_match("/^[a-zA-Z\s]+$/", $description)){
+        $error[]="description must contain only letters and spaces";
+     }
+     //price
+     if(empty($price)){
+        $error[]=" price is empty";
+     }elseif($price <= 0){
+        $error[]= " price must be a positve number ";
+     }elseif(!is_numeric($price)){
+        $error[]= " price must be a number ";
+     }elseif(!preg_match("/^[0-9.]+$/", $price)){
+        $error[]= " price must be a number ";
+     }
+
+     // stock 
+     if(empty($stock)){
+        $error[]=" stock is empty";
+     }elseif($stock < 0){
+        $error[]= " stock must be a positve number ";
+     }elseif(!is_numeric($stock)){
+        $error[]= " stock must be a number ";
+     }
+
+     if(empty($error)){
+        $query="UPDATE products SET name='$name',description='$description',price='$price',stock='$stock' WHERE id=$id";
+        $ranQuery=mysqli_query($conn,$query);
+        if($ranQuery){
+            $_SESSION['success']=['data updated successfully'];
+            header("location:../homePage.php");
+        }
+
+     }
+
+    }else{
+        header("location:../inc/404.php");
+    }
+}else{
+    header("location:../inc/404.php");
+}
